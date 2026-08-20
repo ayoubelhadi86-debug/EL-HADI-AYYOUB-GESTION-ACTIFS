@@ -1,0 +1,1013 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>EL HADI AYYOUB — GESTION DES ACTIFS</title>
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.7/dist/chart.umd.min.js"></script>
+<style>
+:root{
+  --bg:#050b16;--panel:#0b1425;--panel2:#0f1b30;--line:#1d2b45;
+  --text:#edf3ff;--muted:#8090aa;--accent:#ffb300;--cyan:#00d4aa;
+  --blue:#3b82f6;--red:#ff5b6e;--purple:#9b6dff;--shadow:0 14px 30px rgba(0,0,0,.22);
+}
+*{box-sizing:border-box}
+html{scroll-behavior:smooth}
+body{margin:0;background:var(--bg);color:var(--text);font-family:Inter,Segoe UI,Arial,sans-serif}
+button,input,select,textarea{font:inherit}
+a{color:inherit;text-decoration:none}
+.app{display:grid;grid-template-columns:250px 1fr;min-height:100vh}
+.sidebar{
+  position:sticky;top:0;height:100vh;border-right:1px solid var(--line);
+  background:#060d19;display:flex;flex-direction:column;z-index:20
+}
+.brand{padding:22px 18px;border-bottom:1px solid var(--line);display:flex;gap:12px;align-items:center}
+.logo{width:42px;height:42px;border-radius:12px;background:var(--accent);color:#07101e;display:grid;place-items:center;font-size:22px;font-weight:900}
+.brand h1{font-size:15px;margin:0}.brand small{color:var(--accent);font-weight:800;letter-spacing:1.5px}
+.nav{padding:14px 10px;overflow:auto;flex:1}
+.nav-title{padding:12px 10px 8px;color:#50617d;font-size:11px;letter-spacing:1.4px}
+.nav button{
+  width:100%;border:0;background:transparent;color:#99aac4;text-align:left;padding:11px 12px;
+  border-radius:9px;cursor:pointer;display:flex;align-items:center;gap:11px;margin:2px 0
+}
+.nav button:hover,.nav button.active{background:#101d33;color:#fff}
+.nav button.active{box-shadow:inset 3px 0 0 var(--accent)}
+.side-bottom{padding:12px;border-top:1px solid var(--line)}
+.status-box{background:#111a32;border:1px solid #44306b;border-radius:12px;padding:12px;color:#a786ff;font-size:12px;margin-bottom:10px}
+.port-box{background:#182a4e;border-radius:12px;padding:12px}.port-box small{color:#7186aa}.port-box strong{display:block;color:#ffc21c;margin-top:5px}
+.main{min-width:0}
+.ticker-wrap{height:46px;border-bottom:1px solid var(--line);background:#030811;overflow:hidden}
+.topbar{
+  height:64px;border-bottom:1px solid var(--line);background:#07101e;display:flex;align-items:center;
+  gap:14px;padding:0 18px;position:sticky;top:0;z-index:15
+}
+.market-badge{display:flex;align-items:center;gap:8px;color:#aab8cf;font-size:13px;white-space:nowrap}
+.dot{width:8px;height:8px;border-radius:50%;background:var(--cyan);box-shadow:0 0 14px var(--cyan)}
+.search{flex:1;max-width:390px;position:relative}
+.search input{width:100%;background:#0c172a;color:#dce7f8;border:1px solid var(--line);border-radius:10px;padding:10px 13px}
+.clock{margin-left:auto;color:#a7b5c9;font-size:13px}
+.btn{border:1px solid var(--line);background:#10203a;color:#dfe9fa;padding:9px 12px;border-radius:9px;cursor:pointer;font-weight:700}
+.btn:hover{border-color:#38547f}.btn-accent{background:var(--accent);color:#10131b;border-color:var(--accent)}.btn-green{background:#063c34;color:#48e0bf;border-color:#0c6b5a}.btn-red{background:#42151e;color:#ff8b98;border-color:#6a202d}
+.content{padding:20px;max-width:1650px;margin:auto}
+.page{display:none}.page.active{display:block}
+.page-title{display:flex;align-items:flex-end;justify-content:space-between;gap:15px;margin-bottom:18px}
+.page-title h2{font-size:23px;margin:0}.page-title p{margin:5px 0 0;color:var(--muted);font-size:13px}
+.actions{display:flex;gap:8px;flex-wrap:wrap}
+.grid{display:grid;gap:14px}.g4{grid-template-columns:repeat(4,1fr)}.g3{grid-template-columns:repeat(3,1fr)}.g2{grid-template-columns:repeat(2,1fr)}
+.card{background:linear-gradient(180deg,#0c1628,#091321);border:1px solid var(--line);border-radius:13px;padding:16px;box-shadow:var(--shadow);min-width:0}
+.card h3{margin:0 0 13px;font-size:15px}.card-sub{color:var(--muted);font-size:12px;margin-top:-7px;margin-bottom:12px}
+.kpi small{color:#788aa7;display:block;font-size:11px;text-transform:uppercase;letter-spacing:.6px}
+.kpi strong{display:block;margin-top:9px;font-size:25px}.kpi span{font-size:12px;color:var(--muted)}
+.pos{color:var(--cyan)!important}.neg{color:var(--red)!important}.amber{color:var(--accent)!important}
+.table-wrap{overflow:auto;border:1px solid var(--line);border-radius:10px}
+table{width:100%;border-collapse:collapse;min-width:760px}
+th,td{padding:10px 11px;border-bottom:1px solid #17243a;text-align:right;font-size:12px;white-space:nowrap}
+th{color:#6f82a1;background:#0a1425;font-size:10px;text-transform:uppercase;letter-spacing:.6px;position:sticky;top:0}
+th:first-child,td:first-child{text-align:left}
+tr:hover td{background:#0d192b}
+.symbol{font-weight:800;color:#fff}.sector{color:#7186a5;font-size:10px}
+.input,select,textarea{
+  width:100%;background:#081323;color:#e7eef9;border:1px solid var(--line);border-radius:8px;padding:9px 10px;outline:none
+}
+.input:focus,select:focus,textarea:focus{border-color:#456caa;box-shadow:0 0 0 3px rgba(59,130,246,.12)}
+.form-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:10px}.field label{display:block;color:#7d8da8;font-size:11px;margin-bottom:5px}
+canvas{max-height:330px}
+.chart-card{height:390px}.chart-card canvas{height:320px!important;max-height:320px}
+.tv-box{height:560px;border:1px solid var(--line);border-radius:12px;overflow:hidden;background:#07101d}
+.tv-tech{height:440px;border:1px solid var(--line);border-radius:12px;overflow:hidden}
+.flex{display:flex;gap:10px;align-items:center}.between{justify-content:space-between}
+.badge{display:inline-flex;align-items:center;padding:5px 8px;border-radius:999px;font-size:10px;font-weight:800;background:#13223b;color:#91a5c3}
+.badge.live{background:#073a31;color:#49e3bd}.badge.demo{background:#3b2a0b;color:#ffc649}
+.progress{height:7px;background:#17243a;border-radius:10px;overflow:hidden}.progress>span{display:block;height:100%;background:linear-gradient(90deg,var(--accent),#ff7b00)}
+.matrix{overflow:auto}.matrix table{min-width:600px}.matrix td,.matrix th{text-align:center}
+.notice{padding:12px 13px;border-radius:9px;background:#0e1a2f;border:1px solid #20365a;color:#91a3bf;font-size:12px;line-height:1.5}
+.good{border-color:#0f5f4e;background:#073027;color:#79e6cc}.warn{border-color:#6f4c10;background:#30240b;color:#ffd878}
+.drop{border:1px dashed #385277;border-radius:12px;padding:26px;text-align:center;color:#8395b2;cursor:pointer}
+.drop:hover{background:#0d192c}
+.mini{font-size:10px;color:#60728f}.mono{font-family:ui-monospace,SFMono-Regular,Consolas,monospace}
+.weights{display:grid;grid-template-columns:repeat(3,1fr);gap:9px}
+.weight-row{background:#0a1526;border:1px solid var(--line);padding:10px;border-radius:9px}.weight-row .top{display:flex;justify-content:space-between;margin-bottom:7px}
+.range{width:100%;accent-color:var(--accent)}
+.tabs{display:flex;gap:6px;border:1px solid var(--line);border-radius:10px;padding:5px;background:#081222;width:max-content;max-width:100%;overflow:auto}
+.tabs button{border:0;background:transparent;color:#8495b1;padding:8px 12px;border-radius:7px;cursor:pointer;white-space:nowrap}.tabs button.active{background:var(--accent);color:#0a0d12;font-weight:800}
+.metric-list{display:grid;grid-template-columns:1fr 1fr;gap:8px}.metric{background:#091524;border:1px solid var(--line);border-radius:9px;padding:10px}.metric small{color:#6e819f}.metric strong{float:right}
+.scenario-row{display:grid;grid-template-columns:1.2fr 2fr .8fr;gap:10px;align-items:center;margin:9px 0}
+.footer{padding:18px;color:#50627f;font-size:11px;text-align:center}
+
+.article-card{background:#091524;border:1px solid var(--line);border-radius:12px;padding:14px;transition:.2s}
+.article-card:hover{transform:translateY(-2px);border-color:#35517c}
+.article-card .tag{display:inline-block;font-size:10px;padding:4px 7px;border-radius:999px;background:#13233d;color:#8fb0df;margin-bottom:8px}
+.article-card h4{margin:0 0 7px;font-size:14px}
+.article-card p{margin:0;color:#7f91ad;font-size:12px;line-height:1.5}
+.alert-row{display:grid;grid-template-columns:1.1fr 1fr 1fr auto;gap:8px;align-items:end;padding:10px;background:#091524;border:1px solid var(--line);border-radius:10px;margin-bottom:8px}
+.premium-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:14px}
+.plan{background:linear-gradient(180deg,#0e192d,#091321);border:1px solid var(--line);border-radius:14px;padding:18px;position:relative}
+.plan.featured{border-color:#9a6611;box-shadow:0 0 0 1px rgba(255,179,0,.25),var(--shadow)}
+.plan .price{font-size:30px;font-weight:900;margin:12px 0}
+.plan ul{padding-left:18px;color:#95a6c0;font-size:12px;line-height:1.8}
+.forecast-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:12px}
+.forecast-box{background:#091524;border:1px solid var(--line);border-radius:10px;padding:12px}
+.forecast-box small{color:#6f82a1;display:block}.forecast-box strong{display:block;font-size:20px;margin-top:7px}
+.source-card{display:grid;grid-template-columns:1.3fr 2fr auto;gap:12px;align-items:center;background:#091524;border:1px solid var(--line);border-radius:10px;padding:12px;margin-bottom:9px}
+
+@media(max-width:1150px){.premium-grid{grid-template-columns:1fr 1fr}.forecast-grid{grid-template-columns:1fr 1fr}.g4{grid-template-columns:repeat(2,1fr)}.g3{grid-template-columns:1fr 1fr}.form-grid{grid-template-columns:1fr 1fr}.weights{grid-template-columns:1fr 1fr}.app{grid-template-columns:78px 1fr}.brand .brandtext,.nav span,.nav-title,.side-bottom{display:none}.brand{justify-content:center}.nav button{justify-content:center;font-size:18px}}
+@media(max-width:750px){.premium-grid,.forecast-grid{grid-template-columns:1fr}.alert-row,.source-card{grid-template-columns:1fr}.g4,.g3,.g2,.form-grid,.weights{grid-template-columns:1fr}.content{padding:12px}.clock{display:none}.topbar{padding:0 10px}.market-badge{display:none}.page-title{align-items:flex-start;flex-direction:column}.app{grid-template-columns:1fr}.sidebar{position:fixed;left:0;right:0;bottom:0;top:auto;width:100%;height:60px;z-index:50;border-right:0;border-top:1px solid var(--line)}.brand,.nav-title,.side-bottom{display:none}.nav{display:flex;padding:5px;overflow-x:auto}.nav button{min-width:52px;padding:9px}.nav button span{display:none}.main{padding-bottom:60px}}
+</style>
+</head>
+<body>
+<div class="app">
+  <aside class="sidebar">
+    <div class="brand"><div class="logo">∿</div><div class="brandtext"><h1>EL HADI AYYOUB</h1><small>GESTION DES ACTIFS</small></div></div>
+    <div class="nav">
+      <div class="nav-title">MARCHÉ & ANALYSE</div>
+      <button class="active" data-page="dashboard">▦ <span>Dashboard</span></button>
+      <button data-page="market">▥ <span>Marché MASI</span></button>
+      <button data-page="tradingview">⌁ <span>TradingView</span></button>
+      <button data-page="analytics">⌁ <span>Analyse</span></button>
+
+      <div class="nav-title">GESTION DES ACTIFS</div>
+      <button data-page="portfolio">▣ <span>Portefeuille</span></button>
+      <button data-page="optimization">◎ <span>Optimisation</span></button>
+      <button data-page="risk">⚠ <span>Risques</span></button>
+      <button data-page="montecarlo">◌ <span>Monte Carlo</span></button>
+      <button data-page="ml">✦ <span>ML / Prévisions</span></button>
+
+      <div class="nav-title">INFORMATIONS</div>
+      <button data-page="articles">▤ <span>Articles</span></button>
+      <button data-page="dividends">◫ <span>Dividendes</span></button>
+      <button data-page="alerts">◉ <span>Alertes</span></button>
+
+      <div class="nav-title">ESPACE & DONNÉES</div>
+      <button data-page="premium">♛ <span>Premium</span></button>
+      <button data-page="data">⇩ <span>Sources données</span></button>
+      <button data-page="settings">⚙ <span>Paramètres</span></button>
+    </div>
+    <div class="side-bottom">
+      <div class="status-box"><b>● TradingView connecté</b><br><span id="sideClock">--:--:-- Maroc</span></div>
+      <div class="port-box"><small>Portefeuille simulé</small><strong id="sideValue">500 000 MAD</strong></div>
+    </div>
+  </aside>
+
+  <main class="main">
+    <div class="ticker-wrap"><div id="tvTicker"></div></div>
+    <div class="topbar">
+      <div class="market-badge"><span class="dot"></span><b>CSEMA:MASI</b><span id="marketMode">TradingView Live</span></div>
+      <div class="search"><input id="globalSearch" placeholder="Rechercher un ticker... ex. ATW"></div>
+      <button class="btn" onclick="goPage('tradingview')">Graphique TV</button>
+      <a class="btn btn-accent" href="https://www.casablanca-bourse.com/" target="_blank" rel="noopener">Bourse Casablanca ↗</a>
+      <div class="clock" id="clock">--:--:-- Casablanca</div>
+    </div>
+
+    <div class="content">
+
+      <!-- DASHBOARD -->
+      <section class="page active" id="dashboard">
+        <div class="page-title">
+          <div><h2>Dashboard — Gestion des actifs</h2><p>Vue consolidée du portefeuille, du risque et des données de marché.</p></div>
+          <div class="actions"><span class="badge live">● TradingView Live</span><span class="badge demo" id="dataBadge">Données quantitatives : DEMO</span></div>
+        </div>
+        <div class="grid g4">
+          <div class="card kpi"><small>Valeur portefeuille</small><strong id="kpiValue">500 000 MAD</strong><span>Capital de référence</span></div>
+          <div class="card kpi"><small>Rendement annualisé</small><strong class="pos" id="kpiReturn">—</strong><span>252 séances</span></div>
+          <div class="card kpi"><small>Volatilité annualisée</small><strong class="amber" id="kpiVol">—</strong><span>Écart-type du portefeuille</span></div>
+          <div class="card kpi"><small>VaR historique 95%</small><strong class="neg" id="kpiVar">—</strong><span>Horizon : 1 séance</span></div>
+        </div>
+        <div class="grid g2" style="margin-top:14px">
+          <div class="card chart-card"><h3>Performance cumulée du portefeuille</h3><div class="card-sub">Base 100 — portefeuille courant</div><canvas id="cumChart"></canvas></div>
+          <div class="card chart-card"><h3>Drawdown</h3><div class="card-sub">Perte depuis le dernier plus-haut</div><canvas id="ddChart"></canvas></div>
+        </div>
+        <div class="grid g3" style="margin-top:14px">
+          <div class="card"><h3>Indicateurs de risque</h3><div class="metric-list" id="dashRiskMetrics"></div></div>
+          <div class="card"><h3>Allocation actuelle</h3><canvas id="allocChart"></canvas></div>
+          <div class="card"><h3>État du système</h3>
+            <div class="notice good">TradingView est intégré pour les graphiques, l'analyse technique et le ticker live.</div>
+            <div class="notice" style="margin-top:9px">Les calculs de portefeuille utilisent les données importées dans le Data Center. Sans import, l'application charge un jeu de données de démonstration clairement identifié.</div>
+            <div class="notice warn" style="margin-top:9px">Pour un usage réel, importe les cours historiques officiels/licenciés de la Bourse de Casablanca ou branche ton API via les paramètres.</div>
+          </div>
+        </div>
+      </section>
+
+      <!-- MARKET -->
+      <section class="page" id="market">
+        <div class="page-title">
+          <div><h2>Marché MASI</h2><p>Watchlist de valeurs marocaines et accès direct aux graphiques TradingView.</p></div>
+          <div class="actions"><button class="btn" onclick="refreshMarketTable()">Actualiser tableau</button></div>
+        </div>
+        <div class="card">
+          <div class="table-wrap">
+            <table><thead><tr><th>Valeur</th><th>Secteur</th><th>Dernier cours data</th><th>Rendement moyen</th><th>Volatilité</th><th>Poids</th><th>TradingView</th></tr></thead><tbody id="marketBody"></tbody></table>
+          </div>
+        </div>
+      </section>
+
+      <!-- TRADINGVIEW -->
+      <section class="page" id="tradingview">
+        <div class="page-title">
+          <div><h2>TradingView — Analyse graphique live</h2><p>Graphique avancé et analyse technique intégrés.</p></div>
+          <div class="actions">
+            <select id="tvSymbol" style="width:180px"></select>
+            <select id="tvInterval" style="width:120px">
+              <option value="D">1D</option><option value="60">1H</option><option value="30">30m</option><option value="15">15m</option><option value="W">1W</option>
+            </select>
+            <button class="btn btn-accent" onclick="renderTradingView()">Charger</button>
+          </div>
+        </div>
+        <div class="grid g3">
+          <div class="card" style="grid-column:span 2;padding:0"><div id="tvAdvanced" class="tv-box"></div></div>
+          <div class="card" style="padding:0"><div id="tvTechnical" class="tv-tech"></div><div class="notice" style="margin:12px">Le contenu TradingView est fourni directement par TradingView. La disponibilité d'un symbole dépend de leur couverture de marché.</div></div>
+        </div>
+      </section>
+
+      <!-- ANALYTICS -->
+      <section class="page" id="analytics">
+        <div class="page-title"><div><h2>Analyse quantitative</h2><p>Rendements, corrélations, covariance et statistiques descriptives.</p></div></div>
+        <div class="grid g2">
+          <div class="card chart-card"><h3>Rendements journaliers</h3><canvas id="returnsChart"></canvas></div>
+          <div class="card chart-card"><h3>Volatilité glissante 20 séances</h3><canvas id="rollingVolChart"></canvas></div>
+        </div>
+        <div class="grid g2" style="margin-top:14px">
+          <div class="card"><h3>Matrice de corrélation</h3><div class="matrix" id="corrMatrix"></div></div>
+          <div class="card"><h3>Statistiques par actif</h3><div class="table-wrap"><table><thead><tr><th>Actif</th><th>Rend. ann.</th><th>Vol. ann.</th><th>Sharpe</th><th>Min jour</th><th>Max jour</th></tr></thead><tbody id="statsBody"></tbody></table></div></div>
+        </div>
+      </section>
+
+      <!-- PORTFOLIO -->
+      <section class="page" id="portfolio">
+        <div class="page-title">
+          <div><h2>Portefeuille</h2><p>Construction, pondérations, suivi de valeur et rééquilibrage.</p></div>
+          <div class="actions"><button class="btn" onclick="equalWeights()">Pondération égale</button><button class="btn btn-accent" onclick="applyWeights()">Appliquer</button></div>
+        </div>
+        <div class="grid g2">
+          <div class="card"><h3>Pondérations des actifs</h3><div class="weights" id="weightsEditor"></div><div class="notice" style="margin-top:10px">La somme des poids est normalisée automatiquement à 100% lors de l'application.</div></div>
+          <div class="card">
+            <h3>Paramètres de portefeuille</h3>
+            <div class="form-grid" style="grid-template-columns:1fr 1fr">
+              <div class="field"><label>Capital (MAD)</label><input class="input" type="number" id="capitalInput" value="500000"></div>
+              <div class="field"><label>Taux sans risque annuel (%)</label><input class="input" type="number" step=".1" id="rfInput" value="2.5"></div>
+            </div>
+            <div class="metric-list" id="portfolioMetrics" style="margin-top:14px"></div>
+          </div>
+        </div>
+        <div class="card" style="margin-top:14px"><h3>Contribution au risque</h3><div class="table-wrap"><table><thead><tr><th>Actif</th><th>Poids</th><th>Volatilité</th><th>Contribution au risque</th><th>Contribution %</th></tr></thead><tbody id="riskContribBody"></tbody></table></div></div>
+      </section>
+
+      <!-- OPTIMIZATION -->
+      <section class="page" id="optimization">
+        <div class="page-title">
+          <div><h2>Optimisation de portefeuille</h2><p>Frontière efficiente, variance minimale, Sharpe maximum et Risk Parity.</p></div>
+          <div class="actions"><button class="btn btn-accent" onclick="runOptimization()">Lancer 12 000 portefeuilles</button></div>
+        </div>
+        <div class="grid g4">
+          <div class="card kpi"><small>Min Variance</small><strong id="minVolKpi">—</strong><span>Volatilité minimale</span></div>
+          <div class="card kpi"><small>Rendement MinVar</small><strong id="minVolRetKpi">—</strong><span>Annualisé</span></div>
+          <div class="card kpi"><small>Max Sharpe</small><strong id="maxSharpeKpi">—</strong><span>Ratio rendement/risque</span></div>
+          <div class="card kpi"><small>Risk Parity</small><strong id="rpVolKpi">—</strong><span>Volatilité estimée</span></div>
+        </div>
+        <div class="grid g2" style="margin-top:14px">
+          <div class="card chart-card"><h3>Frontière efficiente simulée</h3><canvas id="frontierChart"></canvas></div>
+          <div class="card">
+            <div class="tabs"><button class="active" onclick="showOptResult('maxSharpe',this)">Max Sharpe</button><button onclick="showOptResult('minVar',this)">Min Variance</button><button onclick="showOptResult('riskParity',this)">Risk Parity</button></div>
+            <h3 style="margin-top:16px">Allocation optimale</h3>
+            <div id="optWeights"></div>
+            <button class="btn btn-green" style="margin-top:12px;width:100%" onclick="applyOptimized()">Appliquer cette allocation</button>
+          </div>
+        </div>
+      </section>
+
+      <!-- RISK -->
+      <section class="page" id="risk">
+        <div class="page-title"><div><h2>Gestion des risques</h2><p>VaR, CVaR, drawdown, downside risk, bêta et exposition.</p></div></div>
+        <div class="grid g4">
+          <div class="card kpi"><small>VaR 95% historique</small><strong class="neg" id="var95">—</strong><span>1 séance</span></div>
+          <div class="card kpi"><small>CVaR 95%</small><strong class="neg" id="cvar95">—</strong><span>Expected Shortfall</span></div>
+          <div class="card kpi"><small>VaR 99% historique</small><strong class="neg" id="var99">—</strong><span>1 séance</span></div>
+          <div class="card kpi"><small>Max Drawdown</small><strong class="neg" id="maxDD">—</strong><span>Historique</span></div>
+        </div>
+        <div class="grid g2" style="margin-top:14px">
+          <div class="card chart-card"><h3>Distribution des rendements</h3><canvas id="histChart"></canvas></div>
+          <div class="card">
+            <h3>Tableau de bord du risque</h3>
+            <div class="metric-list" id="riskMetrics"></div>
+            <h3 style="margin-top:18px">Limites de risque</h3>
+            <div class="field"><label>VaR 95% maximale acceptable (% du capital)</label><input id="limitVar" class="input" type="number" value="2" step=".1" onchange="renderRiskLimits()"></div>
+            <div class="field" style="margin-top:10px"><label>Volatilité annuelle maximale (%)</label><input id="limitVol" class="input" type="number" value="25" step="1" onchange="renderRiskLimits()"></div>
+            <div id="riskLimitStatus" style="margin-top:10px"></div>
+          </div>
+        </div>
+      </section>
+
+      <!-- MONTE CARLO -->
+      <section class="page" id="montecarlo">
+        <div class="page-title">
+          <div><h2>Simulation Monte Carlo</h2><p>Projection probabiliste de la valeur du portefeuille.</p></div>
+          <div class="actions"><button class="btn btn-accent" onclick="runMonteCarlo()">Simuler 2 000 trajectoires</button></div>
+        </div>
+        <div class="grid g4">
+          <div class="card kpi"><small>Médiane finale</small><strong id="mcMedian">—</strong><span>Horizon 1 an</span></div>
+          <div class="card kpi"><small>Percentile 5%</small><strong class="neg" id="mcP5">—</strong><span>Scénario défavorable</span></div>
+          <div class="card kpi"><small>Percentile 95%</small><strong class="pos" id="mcP95">—</strong><span>Scénario favorable</span></div>
+          <div class="card kpi"><small>Prob. de perte</small><strong id="mcLoss">—</strong><span>Valeur finale &lt; capital</span></div>
+        </div>
+        <div class="grid g2" style="margin-top:14px">
+          <div class="card chart-card"><h3>Trajectoires simulées</h3><canvas id="mcPaths"></canvas></div>
+          <div class="card chart-card"><h3>Distribution des valeurs finales</h3><canvas id="mcDist"></canvas></div>
+        </div>
+      </section>
+
+      <!-- STRESS -->
+      <section class="page" id="stress">
+        <div class="page-title"><div><h2>Stress Tests & Scénarios</h2><p>Mesure de l'impact de chocs de marché sur le portefeuille.</p></div><button class="btn btn-accent" onclick="runStress()">Calculer les scénarios</button></div>
+        <div class="grid g2">
+          <div class="card">
+            <h3>Scénarios globaux</h3>
+            <div class="scenario-row"><b>Correction légère</b><input class="range" type="range" min="-30" max="20" value="-5" id="stress1" oninput="this.nextElementSibling.value=this.value+'%'"><output>-5%</output></div>
+            <div class="scenario-row"><b>Choc de marché</b><input class="range" type="range" min="-50" max="20" value="-15" id="stress2" oninput="this.nextElementSibling.value=this.value+'%'"><output>-15%</output></div>
+            <div class="scenario-row"><b>Crise sévère</b><input class="range" type="range" min="-70" max="20" value="-30" id="stress3" oninput="this.nextElementSibling.value=this.value+'%'"><output>-30%</output></div>
+            <div class="notice">Les chocs sont appliqués à la valeur du portefeuille. Utilise les sensibilités personnalisées ci-dessous pour un scénario multi-actifs plus fin.</div>
+          </div>
+          <div class="card"><h3>Résultats</h3><div class="table-wrap"><table><thead><tr><th>Scénario</th><th>Choc</th><th>Perte estimée</th><th>Valeur après choc</th></tr></thead><tbody id="stressBody"></tbody></table></div></div>
+        </div>
+        <div class="card" style="margin-top:14px"><h3>Sensibilité personnalisée par actif</h3><div class="weights" id="stressAssetEditor"></div><button class="btn btn-green" style="margin-top:12px" onclick="customStress()">Calculer le choc multi-actifs</button><div id="customStressResult" style="margin-top:10px"></div></div>
+      </section>
+
+
+      <!-- ML / PREVISIONS -->
+      <section class="page" id="ml">
+        <div class="page-title">
+          <div><h2>ML / Prévisions</h2><p>Prévisions simples basées sur les rendements historiques du portefeuille et des actifs.</p></div>
+          <div class="actions">
+            <select id="mlAsset" style="width:190px"></select>
+            <select id="mlHorizon" style="width:130px">
+              <option value="5">5 séances</option>
+              <option value="10">10 séances</option>
+              <option value="20" selected>20 séances</option>
+              <option value="60">60 séances</option>
+            </select>
+            <button class="btn btn-accent" onclick="runForecast()">Calculer</button>
+          </div>
+        </div>
+        <div class="forecast-grid">
+          <div class="forecast-box"><small>Dernier cours</small><strong id="mlLast">—</strong></div>
+          <div class="forecast-box"><small>Prévision horizon</small><strong id="mlForecast">—</strong></div>
+          <div class="forecast-box"><small>Tendance</small><strong id="mlTrend">—</strong></div>
+          <div class="forecast-box"><small>Volatilité estimée</small><strong id="mlVol">—</strong></div>
+        </div>
+        <div class="grid g2" style="margin-top:14px">
+          <div class="card chart-card"><h3>Historique + prévision</h3><div class="card-sub">Régression linéaire sur fenêtre récente</div><canvas id="forecastChart"></canvas></div>
+          <div class="card">
+            <h3>Signal quantitatif</h3>
+            <div id="mlSignal" class="notice">Choisis un actif puis lance le calcul.</div>
+            <h3 style="margin-top:18px">Indicateurs</h3>
+            <div class="metric-list" id="mlMetrics"></div>
+            <div class="notice warn" style="margin-top:12px">Cette page produit une estimation statistique simple et non un conseil d’achat ou de vente.</div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ARTICLES -->
+      <section class="page" id="articles">
+        <div class="page-title">
+          <div><h2>Articles</h2><p>Bibliothèque interne de thèmes à suivre pour l’analyse des marchés et des portefeuilles.</p></div>
+          <button class="btn btn-accent" onclick="addCustomArticle()">+ Ajouter une note</button>
+        </div>
+        <div class="grid g3" id="articlesGrid"></div>
+      </section>
+
+      <!-- DIVIDENDES -->
+      <section class="page" id="dividends">
+        <div class="page-title">
+          <div><h2>Dividendes</h2><p>Suivi des dividendes estimés ou saisis manuellement par valeur.</p></div>
+          <button class="btn btn-accent" onclick="addDividendRow()">+ Ajouter</button>
+        </div>
+        <div class="grid g4">
+          <div class="card kpi"><small>Dividendes annuels estimés</small><strong id="divTotal">—</strong><span>Selon le capital et les poids actuels</span></div>
+          <div class="card kpi"><small>Rendement dividende portefeuille</small><strong id="divYield">—</strong><span>Moyenne pondérée</span></div>
+          <div class="card kpi"><small>Valeurs renseignées</small><strong id="divCount">—</strong><span>Actifs avec rendement</span></div>
+          <div class="card kpi"><small>Capital de référence</small><strong id="divCapital">—</strong><span>Portefeuille courant</span></div>
+        </div>
+        <div class="card" style="margin-top:14px">
+          <div class="table-wrap">
+            <table>
+              <thead><tr><th>Actif</th><th>Rendement dividende %</th><th>Poids</th><th>Revenu estimé</th><th>Action</th></tr></thead>
+              <tbody id="dividendBody"></tbody>
+            </table>
+          </div>
+        </div>
+      </section>
+
+      <!-- ALERTES -->
+      <section class="page" id="alerts">
+        <div class="page-title">
+          <div><h2>Alertes</h2><p>Crée des seuils de prix ou de risque. Les alertes sont vérifiées localement dans cette page.</p></div>
+          <button class="btn btn-accent" onclick="addAlert()">+ Nouvelle alerte</button>
+        </div>
+        <div class="card">
+          <div id="alertsEditor"></div>
+          <div class="notice" style="margin-top:10px">Les alertes de cette version fonctionnent lorsque l’application est ouverte. Elles ne remplacent pas un service de notification serveur.</div>
+        </div>
+        <div class="card" style="margin-top:14px"><h3>État des alertes</h3><div id="alertsStatus"></div></div>
+      </section>
+
+      <!-- PREMIUM -->
+      <section class="page" id="premium">
+        <div class="page-title">
+          <div><h2>EL HADI AYYOUB Premium</h2><p>Présentation des niveaux d’accès de la plateforme.</p></div>
+          <span class="badge demo">Démo interface</span>
+        </div>
+        <div class="premium-grid">
+          <div class="plan">
+            <span class="badge">GRATUIT</span>
+            <h3 style="margin-top:14px">Accès Gratuit</h3>
+            <div class="price">0 <span style="font-size:12px;color:#7386a5">MAD</span></div>
+            <ul><li>Dashboard principal</li><li>Graphiques standards</li><li>Portefeuille limité</li><li>Import CSV manuel</li></ul>
+            <button class="btn" style="width:100%">Plan actuel</button>
+          </div>
+          <div class="plan featured">
+            <span class="badge demo">POPULAIRE</span>
+            <h3 style="margin-top:14px;color:#ffbf22">Professionnel</h3>
+            <div class="price">299 <span style="font-size:12px;color:#7386a5">MAD/mois</span></div>
+            <ul><li>Optimisation avancée</li><li>VaR & CVaR</li><li>Monte Carlo</li><li>Stress tests</li><li>ML / Prévisions</li><li>Alertes illimitées</li></ul>
+            <button class="btn btn-accent" style="width:100%">Choisir Professionnel</button>
+          </div>
+          <div class="plan">
+            <span class="badge live">ÉCONOMIE 30%</span>
+            <h3 style="margin-top:14px;color:#27d5b0">Professionnel Annuel</h3>
+            <div class="price">2490 <span style="font-size:12px;color:#7386a5">MAD/an</span></div>
+            <ul><li>Tout le plan Professionnel</li><li>Accès annuel</li><li>Rapports avancés</li><li>Support prioritaire</li></ul>
+            <button class="btn btn-green" style="width:100%">Choisir Annuel</button>
+          </div>
+        </div>
+      </section>
+
+      <!-- DATA -->
+      <section class="page" id="data">
+        <div class="page-title"><div><h2>Sources données</h2><p>Import des cours historiques et gestion des sources utilisées dans tous les calculs quantitatifs.</p></div><div class="actions"><button class="btn" onclick="loadDemoData(true)">Recharger démo</button><button class="btn btn-red" onclick="clearStoredData()">Effacer données locales</button></div></div>
+        <div class="card" style="margin-bottom:14px">
+          <h3>Sources disponibles</h3>
+          <div class="source-card"><div><b>Bourse de Casablanca</b><div class="mini">Source institutionnelle / marché marocain</div></div><div class="mini">À utiliser pour les données officielles ou fichiers historiques lorsque disponibles.</div><a class="btn btn-accent" href="https://www.casablanca-bourse.com/" target="_blank" rel="noopener">Ouvrir ↗</a></div>
+          <div class="source-card"><div><b>TradingView</b><div class="mini">Graphiques et analyse technique</div></div><div class="mini">Widgets live intégrés pour l’affichage des symboles disponibles.</div><a class="btn" href="https://www.tradingview.com/" target="_blank" rel="noopener">Ouvrir ↗</a></div>
+          <div class="source-card"><div><b>CSV / API personnalisée</b><div class="mini">Calculs quantitatifs internes</div></div><div class="mini">Importe tes historiques ou connecte une API compatible via Paramètres.</div><button class="btn btn-green" onclick="goPage('settings')">Configurer</button></div>
+        </div>
+        <div class="grid g2">
+          <div class="card">
+            <h3>Importer un CSV</h3>
+            <input type="file" id="csvFile" accept=".csv,text/csv" style="display:none" onchange="handleCSV(event)">
+            <div class="drop" onclick="document.getElementById('csvFile').click()"><b>Cliquer pour choisir un fichier CSV</b><br><span class="mini">Format long : Date,Ticker,Close — ou format large : Date,ATW,BCP,IAM,...</span></div>
+            <div class="notice good" style="margin-top:12px">Exemple recommandé : Date,Ticker,Close<br>2026-01-02,ATW,701.50<br>2026-01-02,BCP,298.00</div>
+          </div>
+          <div class="card">
+            <h3>État des données</h3>
+            <div class="metric-list" id="dataStatus"></div>
+            <button class="btn btn-green" style="margin-top:12px;width:100%" onclick="downloadTemplate()">Télécharger modèle CSV</button>
+          </div>
+        </div>
+        <div class="card" style="margin-top:14px"><h3>Aperçu des dernières observations</h3><div class="table-wrap"><table><thead id="previewHead"></thead><tbody id="previewBody"></tbody></table></div></div>
+      </section>
+
+      <!-- SETTINGS -->
+      <section class="page" id="settings">
+        <div class="page-title"><div><h2>Paramètres & Connexions</h2><p>TradingView, Bourse de Casablanca et connecteur API personnalisé.</p></div></div>
+        <div class="grid g2">
+          <div class="card">
+            <h3>TradingView</h3>
+            <div class="notice good">Les widgets TradingView sont intégrés directement dans cette application. Ils nécessitent une connexion Internet.</div>
+            <div class="field" style="margin-top:12px"><label>Symbole MASI TradingView</label><input class="input mono" id="masiSymbol" value="CSEMA:MASI"></div>
+            <div class="field" style="margin-top:10px"><label>Préfixe TradingView pour les actions</label><input class="input mono" id="tvPrefix" value="CSEMA:"></div>
+            <button class="btn btn-accent" style="margin-top:12px" onclick="saveSettings()">Sauvegarder</button>
+          </div>
+          <div class="card">
+            <h3>API de données personnalisée</h3>
+            <div class="notice">Optionnelle. Pour des calculs réellement live, branche une API/licence de données compatible avec la Bourse de Casablanca. Les widgets TradingView restent indépendants de cette API.</div>
+            <div class="field" style="margin-top:12px"><label>URL endpoint historique</label><input class="input mono" id="apiUrl" placeholder="https://votre-api/historical?symbol={symbol}&apikey={key}"></div>
+            <div class="field" style="margin-top:10px"><label>Clé API</label><input class="input mono" type="password" id="apiKey" placeholder="Votre clé"></div>
+            <div class="field" style="margin-top:10px"><label>Tickers à charger (séparés par virgule)</label><input class="input mono" id="apiTickers" value="ATW,BCP,IAM,BOA,HPS,LHM"></div>
+            <button class="btn btn-green" style="margin-top:12px" onclick="fetchCustomAPI()">Tester & charger API</button>
+            <div id="apiStatus" style="margin-top:10px"></div>
+          </div>
+        </div>
+        <div class="card" style="margin-top:14px"><h3>Liens marché</h3><div class="actions"><a class="btn btn-accent" href="https://www.casablanca-bourse.com/" target="_blank" rel="noopener">Site officiel Bourse Casablanca ↗</a><a class="btn" href="https://www.tradingview.com/" target="_blank" rel="noopener">TradingView ↗</a></div></div>
+      </section>
+
+      <div class="footer">EL HADI AYYOUB — GESTION DES ACTIFS · Outil éducatif et analytique. Les données de démonstration ne constituent ni des cours officiels ni un conseil d'investissement.</div>
+    </div>
+  </main>
+</div>
+
+<script>
+const ASSETS = [
+  {ticker:"ATW",name:"Attijariwafa Bank",sector:"Banques",seed:690},
+  {ticker:"BCP",name:"Banque Centrale Populaire",sector:"Banques",seed:285},
+  {ticker:"IAM",name:"Maroc Telecom",sector:"Télécoms",seed:105},
+  {ticker:"BOA",name:"Bank of Africa",sector:"Banques",seed:188},
+  {ticker:"HPS",name:"HPS",sector:"Technologie",seed:620},
+  {ticker:"LHM",name:"LafargeHolcim Maroc",sector:"Matériaux",seed:1880}
+];
+
+let dataMode="DEMO";
+let priceData={};
+let dates=[];
+let weights={};
+let optResults={};
+let currentOpt="maxSharpe";
+let charts={};
+let settings={masiSymbol:"CSEMA:MASI",tvPrefix:"CSEMA:"};
+
+const $=id=>document.getElementById(id);
+const pct=x=>(100*x).toFixed(2)+"%";
+const money=x=>new Intl.NumberFormat("fr-MA",{maximumFractionDigits:0}).format(x)+" MAD";
+const clamp=(x,a,b)=>Math.max(a,Math.min(b,x));
+const mean=a=>a.length?a.reduce((s,x)=>s+x,0)/a.length:0;
+const std=a=>{if(a.length<2)return 0;let m=mean(a);return Math.sqrt(a.reduce((s,x)=>s+(x-m)**2,0)/(a.length-1))}
+const quantile=(arr,q)=>{if(!arr.length)return 0;let a=[...arr].sort((x,y)=>x-y),p=(a.length-1)*q,b=Math.floor(p),r=p-b;return a[b]+(a[b+1]!==undefined?r*(a[b+1]-a[b]):0)}
+const cov=(a,b)=>{let n=Math.min(a.length,b.length);if(n<2)return 0;let aa=a.slice(-n),bb=b.slice(-n),ma=mean(aa),mb=mean(bb);return aa.reduce((s,x,i)=>s+(x-ma)*(bb[i]-mb),0)/(n-1)}
+function normalRandom(){let u=0,v=0;while(!u)u=Math.random();while(!v)v=Math.random();return Math.sqrt(-2*Math.log(u))*Math.cos(2*Math.PI*v)}
+
+function tvTickerConfig(){
+ return {
+  symbols:[
+   {proName:settings.masiSymbol,title:"MASI"},
+   {proName:settings.tvPrefix+"ATW",title:"ATW"},
+   {proName:settings.tvPrefix+"BCP",title:"BCP"},
+   {proName:settings.tvPrefix+"IAM",title:"IAM"},
+   {proName:settings.tvPrefix+"BOA",title:"BOA"},
+   {proName:settings.tvPrefix+"HPS",title:"HPS"},
+   {proName:settings.tvPrefix+"LHM",title:"LHM"}
+  ],
+  showSymbolLogo:true,isTransparent:true,displayMode:"adaptive",colorTheme:"dark",locale:"fr"
+ };
+}
+function loadTVWidget(containerId,src,config){
+ let el=$(containerId);if(!el)return;el.innerHTML="";
+ let wrap=document.createElement("div");wrap.className="tradingview-widget-container";wrap.style.height="100%";wrap.style.width="100%";
+ let widget=document.createElement("div");widget.className="tradingview-widget-container__widget";widget.style.height="100%";widget.style.width="100%";
+ let script=document.createElement("script");script.type="text/javascript";script.src=src;script.async=true;script.innerHTML=JSON.stringify(config);
+ wrap.appendChild(widget);wrap.appendChild(script);el.appendChild(wrap);
+}
+function renderTicker(){loadTVWidget("tvTicker","https://s3.tradingview.com/external-embedding/embed-widget-ticker-tape.js",tvTickerConfig())}
+function renderTradingView(symbolOverride){
+ let ticker=symbolOverride||$("tvSymbol").value||"ATW";
+ let interval=$("tvInterval").value||"D";
+ let symbol=ticker.includes(":")?ticker:settings.tvPrefix+ticker;
+ loadTVWidget("tvAdvanced","https://s3.tradingview.com/external-embedding/embed-widget-advanced-chart.js",{
+   autosize:true,symbol,interval,timezone:"Africa/Casablanca",theme:"dark",style:"1",locale:"fr",
+   enable_publishing:false,hide_side_toolbar:false,allow_symbol_change:true,calendar:false,support_host:"https://www.tradingview.com"
+ });
+ loadTVWidget("tvTechnical","https://s3.tradingview.com/external-embedding/embed-widget-technical-analysis.js",{
+   interval:"1D",width:"100%",isTransparent:true,height:"100%",symbol,showIntervalTabs:true,displayMode:"single",locale:"fr",colorTheme:"dark"
+ });
+}
+
+function goPage(page){
+ document.querySelectorAll(".page").forEach(x=>x.classList.remove("active"));
+ document.querySelectorAll(".nav button").forEach(x=>x.classList.toggle("active",x.dataset.page===page));
+ $(page).classList.add("active");
+ if(page==="tradingview")setTimeout(()=>renderTradingView(),50);
+ if(page==="analytics")setTimeout(renderAnalytics,50);
+ if(page==="optimization")setTimeout(()=>{if(!optResults.maxSharpe)runOptimization();},50);
+ if(page==="risk")setTimeout(renderRisk,50);
+ if(page==="montecarlo")setTimeout(()=>{if(!$("mcMedian").textContent.includes("MAD"))runMonteCarlo();},50);
+ if(page==="stress")setTimeout(runStress,50);
+ if(page==="data")setTimeout(renderDataCenter,50);
+ if(page==="ml")setTimeout(()=>{fillMLAssets();runForecast();},50);
+ if(page==="articles")setTimeout(renderArticles,50);
+ if(page==="dividends")setTimeout(renderDividends,50);
+ if(page==="alerts")setTimeout(()=>{renderAlerts();checkAlerts();},50);
+ if(page==="premium")setTimeout(()=>{},50);
+}
+document.querySelectorAll(".nav button").forEach(b=>b.addEventListener("click",()=>goPage(b.dataset.page)));
+
+function generateBusinessDates(n){
+ let out=[],d=new Date();d.setDate(d.getDate()-n*1.5);
+ while(out.length<n){d.setDate(d.getDate()+1);if(d.getDay()!=0&&d.getDay()!=6)out.push(d.toISOString().slice(0,10))}
+ return out;
+}
+function seededNoise(seed,i){let x=Math.sin((i+1)*(seed*0.013+1.7))*10000;return x-Math.floor(x)}
+function loadDemoData(force=false){
+ dates=generateBusinessDates(520);priceData={};
+ ASSETS.forEach((a,k)=>{
+  let p=a.seed;let series=[];
+  for(let i=0;i<dates.length;i++){
+   let n1=seededNoise(71+k*19,i)-.5,n2=seededNoise(181+k*7,i)-.5;
+   let common=(seededNoise(999,i)-.5)*.012;
+   let r=0.00032+common*0.45+n1*0.018+n2*0.006;
+   p=Math.max(5,p*Math.exp(r));
+   series.push(+p.toFixed(3));
+  }
+  priceData[a.ticker]=series;
+ });
+ dataMode="DEMO";
+ initWeights();
+ if(force)localStorage.removeItem("masiImportedData");
+ updateAll();
+}
+function initWeights(){
+ let tickers=activeTickers(),w=1/Math.max(1,tickers.length);weights={};tickers.forEach(t=>weights[t]=w);
+}
+function activeTickers(){return Object.keys(priceData)}
+function returnsOf(t){
+ let p=priceData[t]||[],r=[];for(let i=1;i<p.length;i++)r.push(p[i]/p[i-1]-1);return r;
+}
+function alignedReturns(){
+ let ts=activeTickers(),rets={};ts.forEach(t=>rets[t]=returnsOf(t));
+ let n=Math.min(...ts.map(t=>rets[t].length));ts.forEach(t=>rets[t]=rets[t].slice(-n));
+ return {tickers:ts,rets,n};
+}
+function normalizedWeights(){
+ let ts=activeTickers(),vals=ts.map(t=>Math.max(0,+weights[t]||0)),s=vals.reduce((a,b)=>a+b,0);
+ if(!s)return Object.fromEntries(ts.map(t=>[t,1/ts.length]));
+ return Object.fromEntries(ts.map((t,i)=>[t,vals[i]/s]));
+}
+function portfolioReturns(wObj=normalizedWeights()){
+ let {tickers,rets,n}=alignedReturns(),out=[];
+ for(let i=0;i<n;i++){let x=0;tickers.forEach(t=>x+=(wObj[t]||0)*rets[t][i]);out.push(x)}
+ return out;
+}
+function portfolioStats(wObj=normalizedWeights()){
+ let r=portfolioReturns(wObj),rf=(+$("rfInput")?.value||2.5)/100,ann=mean(r)*252,vol=std(r)*Math.sqrt(252);
+ let downside=std(r.filter(x=>x<0))*Math.sqrt(252);
+ let sharpe=vol?(ann-rf)/vol:0,sortino=downside?(ann-rf)/downside:0;
+ let v95=Math.max(0,-quantile(r,.05)),v99=Math.max(0,-quantile(r,.01));
+ let tail=r.filter(x=>x<=quantile(r,.05)),cvar=Math.max(0,-mean(tail));
+ let value=1,peak=1,maxdd=0,cum=[],dd=[];
+ r.forEach(x=>{value*=1+x;peak=Math.max(peak,value);let d=value/peak-1;maxdd=Math.min(maxdd,d);cum.push(value);dd.push(d)});
+ return {r,ann,vol,downside,sharpe,sortino,v95,v99,cvar,maxdd,cum,dd};
+}
+function assetStats(t){
+ let r=returnsOf(t),ann=mean(r)*252,vol=std(r)*Math.sqrt(252),rf=(+$("rfInput")?.value||2.5)/100;
+ return {r,ann,vol,sharpe:vol?(ann-rf)/vol:0,min:Math.min(...r),max:Math.max(...r)}
+}
+function setChart(id,config){
+ if(charts[id])charts[id].destroy();
+ let el=$(id);if(!el)return;
+ charts[id]=new Chart(el,config);
+}
+const gridColor="#22314a",textColor="#7f91ae";
+function baseScales(){
+ return {x:{ticks:{color:textColor,maxTicksLimit:8},grid:{color:gridColor}},y:{ticks:{color:textColor},grid:{color:gridColor}}}
+}
+function updateDashboard(){
+ let s=portfolioStats(),capital=+$("capitalInput").value||500000;
+ $("kpiValue").textContent=money(capital);$("sideValue").textContent=money(capital);
+ $("kpiReturn").textContent=pct(s.ann);$("kpiVol").textContent=pct(s.vol);$("kpiVar").textContent=pct(s.v95);
+ $("dashRiskMetrics").innerHTML=[
+  ["Sharpe",s.sharpe.toFixed(2)],["Sortino",s.sortino.toFixed(2)],["CVaR 95%",pct(s.cvar)],["Max Drawdown",pct(s.maxdd)]
+ ].map(x=>`<div class="metric"><small>${x[0]}</small><strong>${x[1]}</strong></div>`).join("");
+ let labels=dates.slice(-(s.cum.length));
+ setChart("cumChart",{type:"line",data:{labels,datasets:[{label:"Portefeuille",data:s.cum.map(x=>(x-1)*100),borderColor:"#00d4aa",backgroundColor:"rgba(0,212,170,.08)",fill:true,pointRadius:0,tension:.15}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{labels:{color:textColor}}},scales:baseScales()}});
+ setChart("ddChart",{type:"line",data:{labels,datasets:[{label:"Drawdown %",data:s.dd.map(x=>x*100),borderColor:"#ff5b6e",backgroundColor:"rgba(255,91,110,.08)",fill:true,pointRadius:0}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{labels:{color:textColor}}},scales:baseScales()}});
+ let w=normalizedWeights();
+ setChart("allocChart",{type:"doughnut",data:{labels:Object.keys(w),datasets:[{data:Object.values(w).map(x=>x*100),backgroundColor:["#ffb300","#00d4aa","#3b82f6","#9b6dff","#ff5b6e","#22c55e","#06b6d4","#f97316"]}]},options:{plugins:{legend:{labels:{color:textColor}}}}});
+}
+function renderMarket(){
+ let w=normalizedWeights(),body=$("marketBody");body.innerHTML="";
+ activeTickers().forEach(t=>{
+  let a=ASSETS.find(x=>x.ticker===t)||{name:t,sector:"Importé"},st=assetStats(t),p=priceData[t].at(-1);
+  body.innerHTML+=`<tr><td><span class="symbol">${t}</span><br><span class="sector">${a.name}</span></td><td>${a.sector}</td><td>${p.toFixed(2)}</td><td class="${st.ann>=0?"pos":"neg"}">${pct(st.ann)}</td><td>${pct(st.vol)}</td><td>${pct(w[t]||0)}</td><td><button class="btn" onclick="openTV('${t}')">Ouvrir TV</button></td></tr>`;
+ });
+}
+function refreshMarketTable(){renderMarket()}
+function openTV(t){$("tvSymbol").value=t;goPage("tradingview");setTimeout(()=>renderTradingView(t),80)}
+
+function renderWeights(){
+ let box=$("weightsEditor");box.innerHTML="";
+ let w=normalizedWeights();
+ activeTickers().forEach(t=>{
+  box.innerHTML+=`<div class="weight-row"><div class="top"><b>${t}</b><span id="wlab-${t}">${(w[t]*100).toFixed(1)}%</span></div><input class="range" id="w-${t}" type="range" min="0" max="100" step=".5" value="${(w[t]*100).toFixed(1)}" oninput="$('wlab-${t}').textContent=this.value+'%'"></div>`;
+ });
+}
+function applyWeights(){
+ activeTickers().forEach(t=>weights[t]=+$("w-"+t).value/100);weights=normalizedWeights();saveLocal();updateAll();
+}
+function equalWeights(){let ts=activeTickers();ts.forEach(t=>weights[t]=1/ts.length);renderWeights();applyWeights()}
+function renderPortfolio(){
+ renderWeights();let s=portfolioStats(),capital=+$("capitalInput").value||500000;
+ $("portfolioMetrics").innerHTML=[
+  ["Capital",money(capital)],["Rendement",pct(s.ann)],["Volatilité",pct(s.vol)],["Sharpe",s.sharpe.toFixed(2)],
+  ["VaR 95%",pct(s.v95)],["CVaR 95%",pct(s.cvar)],["Sortino",s.sortino.toFixed(2)],["Max DD",pct(s.maxdd)]
+ ].map(x=>`<div class="metric"><small>${x[0]}</small><strong>${x[1]}</strong></div>`).join("");
+ renderRiskContrib();
+}
+function covarianceMatrix(){
+ let {tickers,rets}=alignedReturns(),m=tickers.map(t=>tickers.map(u=>cov(rets[t],rets[u])*252));return {tickers,m,rets}
+}
+function renderRiskContrib(){
+ let {tickers,m}=covarianceMatrix(),w=normalizedWeights(),wv=tickers.map(t=>w[t]),mw=m.map(row=>row.reduce((s,x,j)=>s+x*wv[j],0));
+ let variance=wv.reduce((s,x,i)=>s+x*mw[i],0),vol=Math.sqrt(Math.max(0,variance));
+ $("riskContribBody").innerHTML=tickers.map((t,i)=>{
+  let rc=vol?wv[i]*mw[i]/vol:0,p=vol?rc/vol:0;
+  return `<tr><td>${t}</td><td>${pct(wv[i])}</td><td>${pct(assetStats(t).vol)}</td><td>${pct(rc)}</td><td>${pct(p)}</td></tr>`;
+ }).join("");
+}
+function renderAnalytics(){
+ let s=portfolioStats(),labels=dates.slice(-s.r.length);
+ setChart("returnsChart",{type:"bar",data:{labels,datasets:[{label:"Portefeuille %",data:s.r.map(x=>x*100),backgroundColor:s.r.map(x=>x>=0?"rgba(0,212,170,.65)":"rgba(255,91,110,.65)")}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{labels:{color:textColor}}},scales:baseScales()}});
+ let roll=[];for(let i=0;i<s.r.length;i++)roll.push(i<19?null:std(s.r.slice(i-19,i+1))*Math.sqrt(252)*100);
+ setChart("rollingVolChart",{type:"line",data:{labels,datasets:[{label:"Vol annualisée %",data:roll,borderColor:"#ffb300",pointRadius:0}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{labels:{color:textColor}}},scales:baseScales()}});
+ renderCorrelation();
+ $("statsBody").innerHTML=activeTickers().map(t=>{let s=assetStats(t);return `<tr><td>${t}</td><td>${pct(s.ann)}</td><td>${pct(s.vol)}</td><td>${s.sharpe.toFixed(2)}</td><td>${pct(s.min)}</td><td>${pct(s.max)}</td></tr>`}).join("");
+}
+function renderCorrelation(){
+ let {tickers,rets}=alignedReturns();
+ let html="<table><thead><tr><th></th>"+tickers.map(t=>`<th>${t}</th>`).join("")+"</tr></thead><tbody>";
+ tickers.forEach(t=>{
+  html+=`<tr><th>${t}</th>`+tickers.map(u=>{let c=cov(rets[t],rets[u])/(std(rets[t])*std(rets[u])||1);let opacity=Math.min(.8,Math.abs(c)*.75+.08);let bg=c>=0?`rgba(0,212,170,${opacity})`:`rgba(255,91,110,${opacity})`;return `<td style="background:${bg}">${c.toFixed(2)}</td>`}).join("")+"</tr>";
+ });
+ html+="</tbody></table>";$("corrMatrix").innerHTML=html;
+}
+function portfolioStatsFromArray(wArr,tickers,mus,covM,rf){
+ let ret=wArr.reduce((s,w,i)=>s+w*mus[i],0),variance=0;
+ for(let i=0;i<wArr.length;i++)for(let j=0;j<wArr.length;j++)variance+=wArr[i]*wArr[j]*covM[i][j];
+ let vol=Math.sqrt(Math.max(0,variance)),sh=vol?(ret-rf)/vol:-999;
+ return {ret,vol,sharpe:sh,weights:Object.fromEntries(tickers.map((t,i)=>[t,wArr[i]]))}
+}
+function randomWeights(n){let a=Array.from({length:n},()=>-Math.log(Math.random()||1e-9)),s=a.reduce((x,y)=>x+y,0);return a.map(x=>x/s)}
+function riskParityWeights(){
+ let {tickers,m}=covarianceMatrix(),n=tickers.length,w=Array(n).fill(1/n);
+ for(let it=0;it<900;it++){
+  let mw=m.map(row=>row.reduce((s,x,j)=>s+x*w[j],0)),variance=w.reduce((s,x,i)=>s+x*mw[i],0);
+  let target=variance/n;
+  let nw=w.map((x,i)=>x*Math.sqrt(target/Math.max(1e-12,x*mw[i])));
+  let sum=nw.reduce((a,b)=>a+b,0);w=nw.map(x=>x/sum);
+ }
+ let mus=tickers.map(t=>assetStats(t).ann),rf=(+$("rfInput").value||2.5)/100;
+ return portfolioStatsFromArray(w,tickers,mus,m,rf);
+}
+function runOptimization(){
+ let {tickers,m}=covarianceMatrix(),mus=tickers.map(t=>assetStats(t).ann),rf=(+$("rfInput").value||2.5)/100;
+ let points=[],minV=null,maxS=null;
+ for(let k=0;k<12000;k++){
+  let w=randomWeights(tickers.length),s=portfolioStatsFromArray(w,tickers,mus,m,rf);
+  if(!minV||s.vol<minV.vol)minV=s;if(!maxS||s.sharpe>maxS.sharpe)maxS=s;
+  if(k%8===0)points.push({x:s.vol*100,y:s.ret*100,sh:s.sharpe});
+ }
+ let rp=riskParityWeights();optResults={minVar:minV,maxSharpe:maxS,riskParity:rp};currentOpt="maxSharpe";
+ $("minVolKpi").textContent=pct(minV.vol);$("minVolRetKpi").textContent=pct(minV.ret);$("maxSharpeKpi").textContent=maxS.sharpe.toFixed(2);$("rpVolKpi").textContent=pct(rp.vol);
+ setChart("frontierChart",{type:"scatter",data:{datasets:[
+  {label:"Portefeuilles",data:points,pointRadius:2,backgroundColor:"rgba(59,130,246,.35)"},
+  {label:"Max Sharpe",data:[{x:maxS.vol*100,y:maxS.ret*100}],pointRadius:7,backgroundColor:"#00d4aa"},
+  {label:"Min Variance",data:[{x:minV.vol*100,y:minV.ret*100}],pointRadius:7,backgroundColor:"#ffb300"},
+  {label:"Risk Parity",data:[{x:rp.vol*100,y:rp.ret*100}],pointRadius:7,backgroundColor:"#9b6dff"}
+ ]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{labels:{color:textColor}}},scales:{x:{title:{display:true,text:"Volatilité %",color:textColor},ticks:{color:textColor},grid:{color:gridColor}},y:{title:{display:true,text:"Rendement %",color:textColor},ticks:{color:textColor},grid:{color:gridColor}}}}});
+ showOptResult("maxSharpe",document.querySelector("#optimization .tabs button"));
+}
+function showOptResult(key,btn){
+ currentOpt=key;document.querySelectorAll("#optimization .tabs button").forEach(x=>x.classList.remove("active"));if(btn)btn.classList.add("active");
+ let s=optResults[key];if(!s)return;
+ $("optWeights").innerHTML=Object.entries(s.weights).map(([t,w])=>`<div style="margin:10px 0"><div class="flex between"><b>${t}</b><span>${pct(w)}</span></div><div class="progress"><span style="width:${w*100}%"></span></div></div>`).join("")+
+ `<div class="notice" style="margin-top:12px">Rendement: <b>${pct(s.ret)}</b> · Volatilité: <b>${pct(s.vol)}</b> · Sharpe: <b>${s.sharpe.toFixed(2)}</b></div>`;
+}
+function applyOptimized(){let s=optResults[currentOpt];if(!s)return;weights={...s.weights};saveLocal();updateAll();goPage("portfolio")}
+function renderRisk(){
+ let s=portfolioStats(),capital=+$("capitalInput").value||500000;
+ $("var95").textContent=pct(s.v95)+" · "+money(s.v95*capital);$("cvar95").textContent=pct(s.cvar)+" · "+money(s.cvar*capital);$("var99").textContent=pct(s.v99)+" · "+money(s.v99*capital);$("maxDD").textContent=pct(s.maxdd);
+ $("riskMetrics").innerHTML=[
+  ["Volatilité annuelle",pct(s.vol)],["Downside risk",pct(s.downside)],["Sharpe",s.sharpe.toFixed(2)],["Sortino",s.sortino.toFixed(2)],
+  ["Rendement annualisé",pct(s.ann)],["Perte VaR 95%",money(s.v95*capital)],["Perte CVaR 95%",money(s.cvar*capital)],["Max Drawdown",pct(s.maxdd)]
+ ].map(x=>`<div class="metric"><small>${x[0]}</small><strong>${x[1]}</strong></div>`).join("");
+ let min=Math.min(...s.r),max=Math.max(...s.r),bins=30,step=(max-min)/bins||.001,counts=Array(bins).fill(0),labels=[];
+ for(let i=0;i<bins;i++)labels.push(((min+(i+.5)*step)*100).toFixed(2));
+ s.r.forEach(x=>counts[Math.min(bins-1,Math.max(0,Math.floor((x-min)/step)))]++);
+ setChart("histChart",{type:"bar",data:{labels,datasets:[{label:"Fréquence",data:counts,backgroundColor:"#3b82f6"}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{labels:{color:textColor}}},scales:baseScales()}});
+ renderRiskLimits();
+}
+function renderRiskLimits(){
+ let s=portfolioStats(),lv=(+$("limitVar").value||2)/100,lvol=(+$("limitVol").value||25)/100,ok=s.v95<=lv&&s.vol<=lvol;
+ $("riskLimitStatus").innerHTML=`<div class="notice ${ok?"good":"warn"}"><b>${ok?"✓ Limites respectées":"⚠ Limite dépassée"}</b><br>VaR 95%: ${pct(s.v95)} / limite ${pct(lv)} · Volatilité: ${pct(s.vol)} / limite ${pct(lvol)}</div>`;
+}
+function runMonteCarlo(){
+ let s=portfolioStats(),capital=+$("capitalInput").value||500000,mu=s.ann,sigma=s.vol,days=252,paths=2000,show=35,finals=[],showData=Array.from({length:show},()=>[capital]);
+ for(let p=0;p<paths;p++){
+  let v=capital;
+  for(let d=1;d<=days;d++){let dr=(mu-.5*sigma*sigma)/252+sigma/Math.sqrt(252)*normalRandom();v*=Math.exp(dr);if(p<show)showData[p].push(v)}
+  finals.push(v);
+ }
+ $("mcMedian").textContent=money(quantile(finals,.5));$("mcP5").textContent=money(quantile(finals,.05));$("mcP95").textContent=money(quantile(finals,.95));$("mcLoss").textContent=pct(finals.filter(x=>x<capital).length/finals.length);
+ setChart("mcPaths",{type:"line",data:{labels:Array.from({length:days+1},(_,i)=>i),datasets:showData.map((x,i)=>({data:x,borderColor:`hsla(${190+i*4},75%,60%,.24)`,pointRadius:0,borderWidth:1}))},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}},scales:baseScales()}});
+ let min=Math.min(...finals),max=Math.max(...finals),bins=35,step=(max-min)/bins||1,counts=Array(bins).fill(0),labs=[];
+ for(let i=0;i<bins;i++)labs.push(Math.round(min+(i+.5)*step));finals.forEach(x=>counts[Math.min(bins-1,Math.max(0,Math.floor((x-min)/step)))]++);
+ setChart("mcDist",{type:"bar",data:{labels:labs,datasets:[{label:"Fréquence",data:counts,backgroundColor:"#9b6dff"}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{labels:{color:textColor}}},scales:baseScales()}});
+}
+function renderStressEditor(){
+ let box=$("stressAssetEditor");box.innerHTML="";
+ activeTickers().forEach(t=>box.innerHTML+=`<div class="weight-row"><div class="top"><b>${t}</b><span id="slab-${t}">-10%</span></div><input class="range" id="shock-${t}" type="range" min="-60" max="40" value="-10" step="1" oninput="$('slab-${t}').textContent=this.value+'%'"></div>`);
+}
+function runStress(){
+ let capital=+$("capitalInput").value||500000,sc=[["Correction légère",+$("stress1").value],["Choc de marché",+$("stress2").value],["Crise sévère",+$("stress3").value]];
+ $("stressBody").innerHTML=sc.map(x=>{let loss=capital*x[1]/100;return `<tr><td>${x[0]}</td><td class="${x[1]<0?"neg":"pos"}">${x[1]}%</td><td class="${loss<0?"neg":"pos"}">${money(loss)}</td><td>${money(capital+loss)}</td></tr>`}).join("");
+}
+function customStress(){
+ let w=normalizedWeights(),impact=0;activeTickers().forEach(t=>impact+=w[t]*(+$("shock-"+t).value/100));let capital=+$("capitalInput").value||500000;
+ $("customStressResult").innerHTML=`<div class="notice ${impact<0?"warn":"good"}">Impact agrégé pondéré : <b>${pct(impact)}</b> · P/L estimé : <b>${money(capital*impact)}</b> · Valeur finale : <b>${money(capital*(1+impact))}</b></div>`;
+}
+function parseCSV(text){
+ let lines=text.replace(/\r/g,"").split("\n").filter(x=>x.trim()),sep=lines[0].includes(";")?";":",",rows=lines.map(l=>l.split(sep).map(x=>x.trim().replace(/^"|"$/g,"")));
+ let head=rows[0].map(x=>x.toLowerCase()),dateIdx=head.indexOf("date"),tickerIdx=head.indexOf("ticker"),closeIdx=head.indexOf("close");
+ if(dateIdx<0)throw new Error("Colonne Date introuvable.");
+ let out={},dset=[];
+ if(tickerIdx>=0&&closeIdx>=0){
+  let map={};rows.slice(1).forEach(r=>{let d=r[dateIdx],t=(r[tickerIdx]||"").toUpperCase(),p=parseFloat((r[closeIdx]||"").replace(",","."));if(d&&t&&isFinite(p)){map[d]??={};map[d][t]=p}});
+  let tickers=[...new Set(Object.values(map).flatMap(o=>Object.keys(o)))],validDates=Object.keys(map).sort().filter(d=>tickers.every(t=>isFinite(map[d][t])));
+  tickers.forEach(t=>out[t]=validDates.map(d=>map[d][t]));dset=validDates;
+ }else{
+  let tickers=rows[0].map((x,i)=>i===dateIdx?null:x.toUpperCase()).filter(Boolean);
+  let valid=rows.slice(1).filter(r=>r[dateIdx]&&tickers.every(t=>{let idx=rows[0].findIndex(h=>h.toUpperCase()===t);return isFinite(parseFloat((r[idx]||"").replace(",",".")))}));
+  dset=valid.map(r=>r[dateIdx]);tickers.forEach(t=>{let idx=rows[0].findIndex(h=>h.toUpperCase()===t);out[t]=valid.map(r=>parseFloat((r[idx]||"").replace(",",".")))});
+ }
+ if(dset.length<20)throw new Error("Pas assez d'observations valides (minimum 20).");
+ return {dates:dset,priceData:out};
+}
+function handleCSV(e){
+ let f=e.target.files[0];if(!f)return;let rd=new FileReader();
+ rd.onload=()=>{try{let d=parseCSV(rd.result);dates=d.dates;priceData=d.priceData;dataMode="IMPORT CSV";initWeights();saveImported();updateAll();goPage("data");alert("CSV chargé avec succès.");}catch(err){alert("Erreur CSV : "+err.message)}};
+ rd.readAsText(f);
+}
+function saveImported(){localStorage.setItem("masiImportedData",JSON.stringify({dates,priceData,dataMode}));}
+function loadImported(){
+ try{let d=JSON.parse(localStorage.getItem("masiImportedData"));if(d&&d.dates?.length&&d.priceData){dates=d.dates;priceData=d.priceData;dataMode=d.dataMode||"IMPORT CSV";initWeights();return true}}catch(e){}return false;
+}
+function clearStoredData(){localStorage.removeItem("masiImportedData");loadDemoData();alert("Données locales effacées. Mode démo restauré.")}
+function renderDataCenter(){
+ let ts=activeTickers(),n=dates.length;
+ $("dataStatus").innerHTML=[
+  ["Mode",dataMode],["Observations",n],["Actifs",ts.length],["Début",dates[0]||"—"],["Fin",dates.at(-1)||"—"],["Tickers",ts.join(", ")]
+ ].map(x=>`<div class="metric"><small>${x[0]}</small><strong style="font-size:11px">${x[1]}</strong></div>`).join("");
+ let show=dates.slice(-8),start=dates.length-show.length;
+ $("previewHead").innerHTML="<tr><th>Date</th>"+ts.map(t=>`<th>${t}</th>`).join("")+"</tr>";
+ $("previewBody").innerHTML=show.map((d,i)=>`<tr><td>${d}</td>${ts.map(t=>`<td>${priceData[t][start+i]?.toFixed(2)??"—"}</td>`).join("")}</tr>`).join("");
+}
+function downloadTemplate(){
+ let txt="Date,Ticker,Close\n2026-01-02,ATW,700.00\n2026-01-02,BCP,290.00\n2026-01-03,ATW,705.00\n2026-01-03,BCP,292.00\n";
+ let b=new Blob(["\ufeff"+txt],{type:"text/csv"}),a=document.createElement("a");a.href=URL.createObjectURL(b);a.download="modele_donnees_masi.csv";a.click();URL.revokeObjectURL(a.href);
+}
+function saveSettings(){
+ settings.masiSymbol=$("masiSymbol").value.trim()||"CSEMA:MASI";settings.tvPrefix=$("tvPrefix").value.trim()||"CSEMA:";
+ localStorage.setItem("masiSettings",JSON.stringify(settings));renderTicker();fillTVSymbols();alert("Paramètres TradingView sauvegardés.");
+}
+function loadSettings(){
+ try{let s=JSON.parse(localStorage.getItem("masiSettings"));if(s)settings={...settings,...s}}catch(e){}
+ $("masiSymbol").value=settings.masiSymbol;$("tvPrefix").value=settings.tvPrefix;
+ $("apiUrl").value=localStorage.getItem("masiApiUrl")||"";$("apiKey").value=localStorage.getItem("masiApiKey")||"";
+}
+function fillTVSymbols(){
+ let sel=$("tvSymbol"),cur=sel.value;sel.innerHTML=`<option value="${settings.masiSymbol}">MASI</option>`+ASSETS.map(a=>`<option value="${a.ticker}">${a.ticker} — ${a.name}</option>`).join("");
+ if(cur)[...sel.options].some(o=>o.value===cur)&&(sel.value=cur);
+}
+function extractHistory(json){
+ if(Array.isArray(json)){
+  return json.map(x=>({date:x.date||x.datetime||x.time,close:+(x.close??x.price)})).filter(x=>x.date&&isFinite(x.close)).sort((a,b)=>String(a.date).localeCompare(String(b.date)));
+ }
+ let arr=json.values||json.data||json.prices||json.history||json.results;
+ if(Array.isArray(arr))return extractHistory(arr);
+ throw new Error("Format API non reconnu. Réponse attendue: tableau d'objets {date, close} ou propriété values/data/prices/history.");
+}
+async function fetchCustomAPI(){
+ let template=$("apiUrl").value.trim(),key=$("apiKey").value.trim(),tickers=$("apiTickers").value.split(",").map(x=>x.trim().toUpperCase()).filter(Boolean);
+ if(!template||!tickers.length){$("apiStatus").innerHTML='<div class="notice warn">Renseigne une URL et au moins un ticker.</div>';return}
+ localStorage.setItem("masiApiUrl",template);localStorage.setItem("masiApiKey",key);
+ $("apiStatus").innerHTML='<div class="notice">Chargement API...</div>';
+ try{
+  let all={};let commonDates=null;
+  for(let t of tickers){
+   let url=template.replaceAll("{symbol}",encodeURIComponent(t)).replaceAll("{key}",encodeURIComponent(key));
+   let r=await fetch(url);if(!r.ok)throw new Error(t+" : HTTP "+r.status);let hist=extractHistory(await r.json());
+   if(hist.length<20)throw new Error(t+" : moins de 20 observations");
+   all[t]=Object.fromEntries(hist.map(x=>[String(x.date).slice(0,10),x.close]));
+   let ds=hist.map(x=>String(x.date).slice(0,10));commonDates=commonDates?commonDates.filter(d=>all[t][d]!=null):ds;
+  }
+  commonDates=[...new Set(commonDates)].sort();if(commonDates.length<20)throw new Error("Pas assez de dates communes entre actifs.");
+  dates=commonDates;priceData={};tickers.forEach(t=>priceData[t]=dates.map(d=>all[t][d]));dataMode="API LIVE/REMOTE";initWeights();saveImported();updateAll();
+  $("apiStatus").innerHTML='<div class="notice good">✓ API chargée. Les calculs utilisent maintenant ces données.</div>';
+ }catch(e){$("apiStatus").innerHTML=`<div class="notice warn">Échec API : ${e.message}<br><span class="mini">Vérifie aussi les règles CORS de ton fournisseur.</span></div>`}
+}
+function saveLocal(){localStorage.setItem("masiWeights",JSON.stringify(weights));localStorage.setItem("masiCapital",$("capitalInput").value);localStorage.setItem("masiRf",$("rfInput").value)}
+function loadLocal(){
+ try{let w=JSON.parse(localStorage.getItem("masiWeights"));if(w)weights={...weights,...w}}catch(e){}
+ $("capitalInput").value=localStorage.getItem("masiCapital")||500000;$("rfInput").value=localStorage.getItem("masiRf")||2.5;
+}
+function updateAll(){
+ if(!activeTickers().length)return;
+ let norm=normalizedWeights();weights=norm;
+ $("dataBadge").textContent="Données quantitatives : "+dataMode;$("dataBadge").className="badge "+(dataMode==="DEMO"?"demo":"live");
+ updateDashboard();renderMarket();renderPortfolio();renderAnalytics();renderRisk();renderStressEditor();runStress();renderDataCenter();
+}
+function clock(){
+ let now=new Date(),time=now.toLocaleTimeString("fr-FR",{timeZone:"Africa/Casablanca",hour12:false});
+ $("clock").textContent=time+" Casablanca";$("sideClock").textContent=time+" Maroc";
+}
+$("capitalInput").addEventListener("change",()=>{saveLocal();updateAll()});$("rfInput").addEventListener("change",()=>{saveLocal();updateAll()});
+$("globalSearch").addEventListener("keydown",e=>{if(e.key==="Enter"){let q=e.target.value.trim().toUpperCase();if(q){let found=ASSETS.find(a=>a.ticker===q||a.name.toUpperCase().includes(q));if(found)openTV(found.ticker)}}});
+
+
+let customArticles = JSON.parse(localStorage.getItem("ehArticles")||"[]");
+let dividendYields = JSON.parse(localStorage.getItem("ehDividendYields")||'{"ATW":4.0,"BCP":3.5,"IAM":6.0,"BOA":3.2,"HPS":1.0,"LHM":4.5}');
+let localAlerts = JSON.parse(localStorage.getItem("ehAlerts")||"[]");
+
+function fillMLAssets(){
+  let sel=$("mlAsset"); if(!sel) return;
+  let cur=sel.value;
+  sel.innerHTML=activeTickers().map(t=>`<option value="${t}">${t}</option>`).join("");
+  if(cur && activeTickers().includes(cur)) sel.value=cur;
+}
+function linReg(y){
+  let n=y.length;if(n<2)return {a:y[0]||0,b:0,r2:0};
+  let sx=(n-1)*n/2, sxx=(n-1)*n*(2*n-1)/6, sy=y.reduce((a,b)=>a+b,0), sxy=y.reduce((s,v,i)=>s+i*v,0);
+  let den=n*sxx-sx*sx, b=den?(n*sxy-sx*sy)/den:0, a=(sy-b*sx)/n;
+  let ym=sy/n, ssTot=y.reduce((s,v)=>s+(v-ym)**2,0), ssRes=y.reduce((s,v,i)=>s+(v-(a+b*i))**2,0);
+  return {a,b,r2:ssTot?1-ssRes/ssTot:0};
+}
+function runForecast(){
+  fillMLAssets();
+  let t=$("mlAsset")?.value||activeTickers()[0], horizon=+($("mlHorizon")?.value||20), p=priceData[t]||[];
+  if(p.length<30)return;
+  let window=Math.min(90,p.length), hist=p.slice(-window), reg=linReg(hist), forecast=[];
+  for(let i=1;i<=horizon;i++)forecast.push(reg.a+reg.b*(window-1+i));
+  let last=hist.at(-1), fp=forecast.at(-1), r=returnsOf(t), vol=std(r.slice(-Math.min(60,r.length)))*Math.sqrt(252);
+  let ma20=mean(p.slice(-20)),ma50=mean(p.slice(-50)),trend=reg.b>0?"Haussière":reg.b<0?"Baissière":"Neutre";
+  $("mlLast").textContent=last.toFixed(2);$("mlForecast").textContent=fp.toFixed(2);$("mlTrend").textContent=trend;$("mlVol").textContent=pct(vol);
+  let signal=(last>ma20&&ma20>ma50&&reg.b>0)?"Momentum positif":(last<ma20&&ma20<ma50&&reg.b<0)?"Momentum négatif":"Signal neutre";
+  $("mlSignal").className="notice "+(signal.includes("positif")?"good":signal.includes("négatif")?"warn":"");
+  $("mlSignal").innerHTML=`<b>${signal}</b><br>Écart prévisionnel : ${pct(fp/last-1)} à ${horizon} séances.`;
+  $("mlMetrics").innerHTML=[
+    ["MA20",ma20.toFixed(2)],["MA50",ma50.toFixed(2)],["Pente/jour",reg.b.toFixed(4)],["R²",reg.r2.toFixed(3)],
+    ["Rend. moy. jour",pct(mean(r))],["Vol. ann.",pct(vol)]
+  ].map(x=>`<div class="metric"><small>${x[0]}</small><strong>${x[1]}</strong></div>`).join("");
+  let labels=dates.slice(-window).concat(Array.from({length:horizon},(_,i)=>"J+"+(i+1)));
+  setChart("forecastChart",{type:"line",data:{labels,datasets:[
+    {label:t+" historique",data:hist.concat(Array(horizon).fill(null)),borderColor:"#3b82f6",pointRadius:0},
+    {label:"Prévision",data:Array(window-1).fill(null).concat([last],forecast),borderColor:"#ffb300",borderDash:[5,5],pointRadius:0}
+  ]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{labels:{color:textColor}}},scales:baseScales()}});
+}
+function renderArticles(){
+  let base=[
+    {tag:"Risque",title:"Comprendre la VaR et la CVaR",text:"Différence entre perte quantile et perte moyenne dans la queue de distribution."},
+    {tag:"Optimisation",title:"Variance minimale vs Sharpe maximum",text:"Deux objectifs différents pour construire un portefeuille diversifié."},
+    {tag:"Marché",title:"Suivre le MASI et les valeurs marocaines",text:"Organisation du suivi quotidien avec données, graphiques et indicateurs."},
+    {tag:"Quantitatif",title:"Monte Carlo en gestion de portefeuille",text:"Utiliser la simulation pour obtenir une distribution de valeurs futures."},
+    {tag:"ML",title:"Prévisions et limites du machine learning",text:"Les modèles peuvent détecter des motifs sans garantir les rendements futurs."},
+    {tag:"Allocation",title:"Risk Parity",text:"Répartir la contribution au risque plutôt que seulement le capital."}
+  ].concat(customArticles);
+  $("articlesGrid").innerHTML=base.map((a,i)=>`<div class="article-card"><span class="tag">${a.tag}</span><h4>${a.title}</h4><p>${a.text}</p>${i>=6?`<button class="btn btn-red" style="margin-top:10px" onclick="deleteArticle(${i-6})">Supprimer</button>`:""}</div>`).join("");
+}
+function addCustomArticle(){
+  let title=prompt("Titre de la note/article :");if(!title)return;
+  let text=prompt("Résumé / contenu court :")||"";
+  let tag=prompt("Catégorie :","Note")||"Note";
+  customArticles.push({tag,title,text});localStorage.setItem("ehArticles",JSON.stringify(customArticles));renderArticles();
+}
+function deleteArticle(i){
+  customArticles.splice(i,1);localStorage.setItem("ehArticles",JSON.stringify(customArticles));renderArticles();
+}
+function addDividendRow(){
+  let t=(prompt("Ticker :")||"").trim().toUpperCase();if(!t)return;
+  let y=parseFloat(prompt("Rendement dividende en % :","4")||"0");if(!isFinite(y))return;
+  dividendYields[t]=y;localStorage.setItem("ehDividendYields",JSON.stringify(dividendYields));renderDividends();
+}
+function removeDividend(t){delete dividendYields[t];localStorage.setItem("ehDividendYields",JSON.stringify(dividendYields));renderDividends()}
+function setDividendYield(t,v){dividendYields[t]=Math.max(0,+v||0);localStorage.setItem("ehDividendYields",JSON.stringify(dividendYields));renderDividends()}
+function renderDividends(){
+  let w=normalizedWeights(),capital=+$("capitalInput").value||500000,ts=activeTickers();
+  let totalYield=0,count=0;ts.forEach(t=>{let y=(+dividendYields[t]||0)/100;totalYield+=(w[t]||0)*y;if(y>0)count++});
+  $("divTotal").textContent=money(capital*totalYield);$("divYield").textContent=pct(totalYield);$("divCount").textContent=count;$("divCapital").textContent=money(capital);
+  $("dividendBody").innerHTML=ts.map(t=>{
+    let y=+dividendYields[t]||0,income=capital*(w[t]||0)*y/100;
+    return `<tr><td>${t}</td><td><input class="input" style="max-width:110px" type="number" step=".1" min="0" value="${y}" onchange="setDividendYield('${t}',this.value)"></td><td>${pct(w[t]||0)}</td><td>${money(income)}</td><td><button class="btn btn-red" onclick="removeDividend('${t}')">Effacer</button></td></tr>`;
+  }).join("");
+}
+function addAlert(){
+  localAlerts.push({ticker:activeTickers()[0]||"ATW",type:"above",value:0,enabled:true});
+  saveAlerts();renderAlerts();checkAlerts();
+}
+function saveAlerts(){localStorage.setItem("ehAlerts",JSON.stringify(localAlerts))}
+function removeAlert(i){localAlerts.splice(i,1);saveAlerts();renderAlerts();checkAlerts()}
+function updateAlert(i,key,val){localAlerts[i][key]=key==="value"?+val:val;saveAlerts();checkAlerts()}
+function renderAlerts(){
+  if(!localAlerts.length)$("alertsEditor").innerHTML='<div class="empty">Aucune alerte. Clique sur « Nouvelle alerte ».</div>';
+  else $("alertsEditor").innerHTML=localAlerts.map((a,i)=>`<div class="alert-row">
+    <div class="field"><label>Actif</label><select onchange="updateAlert(${i},'ticker',this.value)">${activeTickers().map(t=>`<option ${t===a.ticker?"selected":""}>${t}</option>`).join("")}</select></div>
+    <div class="field"><label>Condition</label><select onchange="updateAlert(${i},'type',this.value)"><option value="above" ${a.type==="above"?"selected":""}>Prix ≥ seuil</option><option value="below" ${a.type==="below"?"selected":""}>Prix ≤ seuil</option><option value="vol" ${a.type==="vol"?"selected":""}>Volatilité ≥ %</option></select></div>
+    <div class="field"><label>Seuil</label><input class="input" type="number" step=".1" value="${a.value}" onchange="updateAlert(${i},'value',this.value)"></div>
+    <button class="btn btn-red" onclick="removeAlert(${i})">Supprimer</button>
+  </div>`).join("");
+}
+function checkAlerts(){
+  if(!$("alertsStatus"))return;
+  if(!localAlerts.length){$("alertsStatus").innerHTML='<div class="notice">Aucune alerte configurée.</div>';return}
+  $("alertsStatus").innerHTML=localAlerts.map(a=>{
+    let p=(priceData[a.ticker]||[]).at(-1),vol=assetStats(a.ticker).vol*100,hit=false,label="";
+    if(a.type==="above"){hit=p>=a.value;label=`${a.ticker} cours ${p?.toFixed(2)} ≥ ${a.value}`}
+    if(a.type==="below"){hit=p<=a.value;label=`${a.ticker} cours ${p?.toFixed(2)} ≤ ${a.value}`}
+    if(a.type==="vol"){hit=vol>=a.value;label=`${a.ticker} vol. ${vol.toFixed(2)}% ≥ ${a.value}%`}
+    return `<div class="notice ${hit?"warn":"good"}" style="margin-bottom:8px"><b>${hit?"⚠ Déclenchée":"✓ En attente"}</b><br>${label}</div>`;
+  }).join("");
+}
+
+
+function init(){
+ loadSettings();fillTVSymbols();renderTicker();fillMLAssets();
+ if(!loadImported())loadDemoData();loadLocal();updateAll();renderTradingView("ATW");runOptimization();runMonteCarlo();
+ renderArticles();renderDividends();renderAlerts();checkAlerts();runForecast();setInterval(()=>{clock();checkAlerts();},1000);clock();
+}
+init();
+</script>
+</body>
+</html>
